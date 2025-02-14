@@ -18,6 +18,10 @@ app.get('/', async (req,res) => {
 });
 
 
+app.get('/fruits/new', (req,res) => {
+    res.send('This route sends the user a form page!')
+});
+
 
 
 
