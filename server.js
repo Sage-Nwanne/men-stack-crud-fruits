@@ -2,6 +2,8 @@ const dotenv = require('dotenv');
 dotenv.config();
 const express= require('express');
 const mongoose = require('mongoose');
+const morgan = require('morgan');
+const methodOverride = require('method-override')
 
 const app = express();
 
@@ -16,6 +18,8 @@ const Fruit = require("./models/fruit")
 //middleware - helps hanle the request body of the form
 app.use(express.urlencoded({extended: false}));
 
+app.use(methodOverride('_method'));
+app.use(morgan('dev'));
 
 
 //get route to landing page i think
@@ -26,26 +30,15 @@ app.get('/', async (req,res) => {
 
 //GET to /fruits * use a res.send to the page to make sure the connection works before res.render
 app.get('/fruits', async (req,res) =>{
-    const allFruits = await Fruit.findById(); //this route when requested gets all the fruits now
+    const allFruits = await Fruit.find(); //this route when requested gets all the fruits now
     // console.log(allFruits) //this is to check in the console if it does
    res.render('fruits/index.ejs', {fruits: allFruits})
 })
-
-
-
-
 
 //Get to /create a new fruit page with the submit button
 app.get('/fruits/new', (req,res) => {
     res.render('fruits/new.ejs');
 });
-
-//GET route to fruitID
-app.get('/fruits/:fruitId',async (req,res) => {
-    const foundFruit = await Fruit.findById(req.params.fruitId);
-    res.render('/fruits/show.ejs', {fruit:foundFruit});
-});
-
 
 
 //submit posts the req.body 
@@ -59,6 +52,27 @@ app.post('/fruits', async (req,res) => {
     res.redirect('/fruits')
 })
 
+
+
+//GET route to fruitID
+app.get('/fruits/:fruitId',async (req,res) => {
+    const foundFruit = await Fruit.findById(req.params.fruitId);
+    res.render('fruits/show.ejs', {fruit:foundFruit});
+});
+
+//DELETE fruit route 
+app.delete('/fruits/:fruitId', async (req,res) => {
+    await Fruit.findByIdAndDelete(req.params.fruitId);
+    res.redirect('/fruits')
+})
+
+
+//edit (update) fruit route
+
+app.get('/fruits/:fruitId/edit', async (req, res) => {
+   const foundFruit = await Fruit.findById(req.params.fruitId);
+   res.render('fruits/edit.ejs', { fruit: foundFruit});
+});
 
 
 app.listen(3000, () => {
